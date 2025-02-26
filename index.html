@@ -420,9 +420,9 @@
         }
     
         function hitungAnuitas() {
-            let P = parseFloat(document.getElementById("P").value.replace(/,/g, ''));
-            let r = parseFloat(document.getElementById("r").value.replace(/,/g, '')) / 100;
-            let n = parseInt(document.getElementById("JAWA").value.replace(/,/g, ''));
+            let P = parseFloat(document.getElementById("P").value.replace(/\./g, ""));
+            let r = parseFloat(document.getElementById("r").value.replace(/\./g, "")) / 100;
+            let n = parseInt(document.getElementById("JAWA").value.replace(/\./g, ""));
 
             console.log("P:", P, "r:", r, "n:", n);
 
