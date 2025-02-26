@@ -274,14 +274,19 @@
                     Jangka Waktu (tahun):
                     <input id="JAWA" type="text" class="w-full border p-2 rounded" required oninput="formatNumber(this)"/>
                 </label>
-                <button onclick="hitungAnuitas()" class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">
-                    Hitung
-                </button>
+                <div class="flex gap-2">
+                    <button onclick="hitungAnuitas('tahun')" class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">
+                        Hitung per Tahun
+                    </button>
+                    <button onclick="hitungAnuitas('bulan')" class="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600">
+                        Hitung per Bulan
+                    </button>
+                </div>
             </div>
 
             <!-- Tabel Hasil -->
             <div id="hasil" class="mt-6 hidden">
-                <h3 class="text-lg font-semibold mb-2">Tabel Pembayaran</h3>
+                <h3 id="judul-hasil" class="text-lg font-semibold mb-2">Tabel Pembayaran</h3>
                 <table class="w-full border-collapse border border-gray-300">
                     <thead>
                         <tr class="bg-gray-100">
@@ -419,31 +424,40 @@
             document.getElementById('fixed-result').innerText = `Bunga tetap: ${interest.toLocaleString()}`;
         }
     
-        function hitungAnuitas() {
+        function hitungAnuitas(mode) {
             let P = parseFloat(document.getElementById("P").value.replace(/\./g, ""));
             let r = parseFloat(document.getElementById("r").value.replace(/\./g, "")) / 100;
             let n = parseInt(document.getElementById("JAWA").value.replace(/\./g, ""));
-
-            console.log("P:", P, "r:", r, "n:", n);
 
             if (isNaN(P) || isNaN(r) || isNaN(n) || P <= 0 || r <= 0 || n <= 0) {
                 alert("Harap masukkan nilai yang valid!");
                 return;
             }
 
-            let A = (P * r) / (1 - Math.pow(1 + r, -n));
+            // Konversi ke bulan jika mode 'bulan'
+            let periode = n;
+            let rate = r;
+            let judul = "Tabel Pembayaran Per Tahun";
+
+            if (mode === "bulan") {
+                periode = n * 12; // Konversi tahun ke bulan
+                rate = r / 12; // Suku bunga bulanan
+                judul = "Tabel Pembayaran Per Bulan";
+            }
+
+            let A = (P * rate) / (1 - Math.pow(1 + rate, -periode));
             let sisaHutang = P;
             let tabelBody = document.getElementById("tabel-body");
             tabelBody.innerHTML = "";
 
-            for (let i = 1; i <= n; i++) {
-                let bunga = sisaHutang * r;
+            for (let i = 1; i <= periode; i++) {
+                let bunga = sisaHutang * rate;
                 let pokok = A - bunga;
                 sisaHutang = Math.max(sisaHutang - pokok, 0);
 
                 let row = `
                     <tr class="text-center">
-                        <td class="border p-2">Tahun ${i}</td>
+                        <td class="border p-2">${mode === "bulan" ? "Bulan" : "Tahun"} ${i}</td>
                         <td class="border p-2">Rp. ${Math.round(A).toLocaleString()}</td>
                         <td class="border p-2">Rp. ${Math.round(bunga).toLocaleString()}</td>
                         <td class="border p-2">Rp. ${Math.round(pokok).toLocaleString()}</td>
@@ -453,6 +467,7 @@
                 tabelBody.innerHTML += row;
             }
 
+            document.getElementById("judul-hasil").textContent = judul;
             document.getElementById("hasil").classList.remove("hidden"); // Tampilkan tabel hasil
         }
     
